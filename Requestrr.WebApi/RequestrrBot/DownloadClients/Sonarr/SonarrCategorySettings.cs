@@ -1,17 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
-namespace Requestrr.WebApi.Controllers.DownloadClients.Sonarr
+namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
 {
-    public class SonarrSettingsModel : TestSonarrSettingsModel
-    {
-        [Required]
-        public List<SonarrCategorySettings> Categories { get; set; } = new List<SonarrCategorySettings>();
-        public bool SearchNewRequests { get; set; }
-        public bool MonitorNewRequests { get; set; }
-    }
-
     public enum SeriesType
     {
         Standard,

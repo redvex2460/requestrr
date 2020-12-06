@@ -255,7 +255,7 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
             throw new System.Exception("An error occurred while searching available tv shows with Sonarr");
         }
 
-        public async Task<TvShowRequestResult> RequestTvShowAsync(TvShowUserRequester requester, TvShow tvShow, TvSeason season)
+        public async Task<TvShowRequestResult> RequestTvShowAsync(Guid categoryId, TvShowUserRequester requester, TvShow tvShow, TvSeason season)
         {
             RefreshSonarrCache();
             try
@@ -266,13 +266,20 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
                                             ? new List<TvSeason>()
                                             : new List<TvSeason> { season };
 
+                var category = SonarrSettings.Categories.FirstOrDefault(x => x.Id == categoryId);
+
+                if (category == null)
+                {
+                    throw new InvalidOperationException("Could not find requested category.");
+                }
+
                 if (string.IsNullOrEmpty(tvShow.DownloadClientId))
                 {
-                    await CreateSonarrTvSeriesAsync(tvShow, requestedSeasons);
+                    await CreateSonarrTvSeriesAsync(category, tvShow, requestedSeasons);
                 }
                 else
                 {
-                    await UpdateSonarrTvSeriesAsync(tvShow, requestedSeasons);
+                    await UpdateSonarrTvSeriesAsync(category, tvShow, requestedSeasons);
                 }
 
                 return new TvShowRequestResult();
@@ -285,25 +292,8 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
             throw new System.Exception("An error occurred while requesting a tv show from Sonarr");
         }
 
-        private async Task CreateSonarrTvSeriesAsync(TvShow tvShow, IReadOnlyList<TvSeason> seasons)
+        private async Task CreateSonarrTvSeriesAsync(SonarrCategorySettings category, TvShow tvShow, IReadOnlyList<TvSeason> seasons)
         {
-            bool isAnime = false;
-
-            try
-            {
-                var tzMazeResponse = await HttpGetAsync($"http://api.tvmaze.com/lookup/shows?thetvdb={tvShow.TheTvDbId}");
-                await tzMazeResponse.ThrowIfNotSuccessfulAsync("TvMazeLookup failed", x => x.message);
-
-                var tvMazeJsonResponse = await tzMazeResponse.Content.ReadAsStringAsync();
-                var tvMazeShow = JsonConvert.DeserializeObject<TvMazeTvShow>(tvMazeJsonResponse);
-
-                isAnime = tvMazeShow.isAnime;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-            }
-
             var response = await HttpGetAsync($"{BaseURL}/series/lookup?term=tvdb:{tvShow.TheTvDbId}");
             await response.ThrowIfNotSuccessfulAsync("SonarrSeriesLookup failed", x => x.error);
 
@@ -313,17 +303,16 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
             response = await HttpPostAsync($"{BaseURL}/series", JsonConvert.SerializeObject(new
             {
                 title = jsonTvShow.title,
-                qualityProfileId = isAnime ? SonarrSettings.AnimeProfileId : SonarrSettings.TvProfileId,
-                profileId = isAnime ? SonarrSettings.AnimeProfileId : SonarrSettings.TvProfileId,
-                languageProfileId = isAnime ? SonarrSettings.AnimeLanguageId : SonarrSettings.TvLanguageId,
+                profileId = category.ProfileId,
+                languageProfileId = category.LanguageId,
                 titleSlug = jsonTvShow.titleSlug,
                 monitored = SonarrSettings.MonitorNewRequests,
                 images = new string[0],
                 tvdbId = tvShow.TheTvDbId,
-                seriesType = isAnime ? "anime" : "standard",
+                seriesType = category.SeriesType.ToString().ToLower(),
                 year = jsonTvShow.year,
-                seasonFolder = isAnime ? SonarrSettings.AnimeUseSeasonFolders : SonarrSettings.TvUseSeasonFolders,
-                rootFolderPath = isAnime ? SonarrSettings.AnimeRootFolder : SonarrSettings.TvRootFolder,
+                seasonFolder = category.UseSeasonFolders,
+                rootFolderPath = category.RootFolder,
                 id = jsonTvShow.id,
                 seasons = jsonTvShow.seasons.Select(s => new
                 {
@@ -349,7 +338,7 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
             }
         }
 
-        private async Task UpdateSonarrTvSeriesAsync(TvShow tvShow, IReadOnlyList<TvSeason> seasons)
+        private async Task UpdateSonarrTvSeriesAsync(SonarrCategorySettings category, TvShow tvShow, IReadOnlyList<TvSeason> seasons)
         {
             var response = await HttpGetAsync($"{BaseURL}/series/{tvShow.DownloadClientId}");
 
@@ -361,12 +350,12 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
 
                     if (sonarrTvShow.id.HasValue)
                     {
-                        await UpdateSonarrTvSeriesAsync(tvShow, seasons);
+                        await UpdateSonarrTvSeriesAsync(category, tvShow, seasons);
                         return;
                     }
                     else
                     {
-                        await CreateSonarrTvSeriesAsync(tvShow, seasons);
+                        await CreateSonarrTvSeriesAsync(category, tvShow, seasons);
                         return;
                     }
                 }
@@ -377,11 +366,11 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
             var jsonResponse = await response.Content.ReadAsStringAsync();
 
             dynamic sonarrSeries = JObject.Parse(jsonResponse);
-            var isAnime = sonarrSeries.seriesType.ToString().Equals("anime", StringComparison.InvariantCultureIgnoreCase);
 
-            sonarrSeries.profileId = isAnime ? SonarrSettings.AnimeProfileId : SonarrSettings.TvProfileId;
+            sonarrSeries.profileId = category.ProfileId;
             sonarrSeries.monitored = SonarrSettings.MonitorNewRequests;
-            sonarrSeries.seasonFolder = isAnime ? SonarrSettings.AnimeUseSeasonFolders : SonarrSettings.TvUseSeasonFolders;
+            sonarrSeries.seasonFolder = category.UseSeasonFolders;
+            sonarrSeries.seriesType = category.SeriesType.ToString().ToLower();
 
             if (seasons.Any())
             {

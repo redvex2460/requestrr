@@ -87,22 +87,9 @@ namespace Requestrr.WebApi.Controllers.DownloadClients
                 settings.DownloadClients.Sonarr.Port = sonarrSettings.Port;
                 settings.DownloadClients.Sonarr.ApiKey = sonarrSettings.ApiKey;
                 settings.DownloadClients.Sonarr.BaseUrl = sonarrSettings.BaseUrl;
-
-                settings.DownloadClients.Sonarr.TvRootFolder = sonarrSettings.TvPath;
-                settings.DownloadClients.Sonarr.TvProfileId = sonarrSettings.TvProfile;
-                settings.DownloadClients.Sonarr.TvTags = JToken.FromObject(sonarrSettings.TvTags);
-                settings.DownloadClients.Sonarr.TvLanguageId = sonarrSettings.TvLanguage;
-                settings.DownloadClients.Sonarr.TvUseSeasonFolders = sonarrSettings.TvUseSeasonFolders;
-
-                settings.DownloadClients.Sonarr.AnimeRootFolder = sonarrSettings.AnimePath;
-                settings.DownloadClients.Sonarr.AnimeProfileId = sonarrSettings.AnimeProfile;
-                settings.DownloadClients.Sonarr.AnimeTags = JToken.FromObject(sonarrSettings.AnimeTags);
-                settings.DownloadClients.Sonarr.AnimeLanguageId = sonarrSettings.AnimeLanguage;
-                settings.DownloadClients.Sonarr.AnimeUseSeasonFolders = sonarrSettings.AnimeUseSeasonFolders;
-
+                settings.DownloadClients.Sonarr.Categories = JToken.FromObject(sonarrSettings.Categories);
                 settings.DownloadClients.Sonarr.SearchNewRequests = sonarrSettings.SearchNewRequests;
                 settings.DownloadClients.Sonarr.MonitorNewRequests = sonarrSettings.MonitorNewRequests;
-
                 settings.DownloadClients.Sonarr.UseSSL = sonarrSettings.UseSSL;
                 settings.DownloadClients.Sonarr.Version = sonarrSettings.Version;
 

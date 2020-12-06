@@ -53,16 +53,18 @@
       "Port": 8989,
       "ApiKey": "",
       "BaseUrl": "",
-      "TvProfileId": "1",
-      "TvRootFolder": "",
-      "TvTags": [],
-      "TvLanguageId": "1",
-      "TvUseSeasonFolders": true,
-      "AnimeProfileId": "1",
-      "AnimeRootFolder": "",
-      "AnimeTags": [],
-      "AnimeLanguageId": "1",
-      "AnimeUseSeasonFolders": true,
+      "Categories": [
+        {
+          "Id" : "e2d860c8-ae65-40eb-a31d-2dd01d27e337",
+          "Name" : "Default",
+          "TvProfileId": "1",
+          "TvRootFolder": "",
+          "TvTags": [],
+          "TvLanguageId": "1",
+          "TvUseSeasonFolders": true,
+          "SeriesType": "standard"
+        }
+      ],
       "SearchNewRequests": true,
       "MonitorNewRequests": true,
       "UseSSL": false,
@@ -84,5 +86,5 @@
   },
   "Port": 4545,
   "BaseUrl" : "",
-  "Version": "1.11.0"
+  "Version": "2.0.0"
 }

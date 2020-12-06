@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -100,9 +101,9 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
             return CreateInstance<ITvShowSearcher>().GetTvShowDetailsAsync(theTvDbIds, token);
         }
 
-        public Task<TvShowRequestResult> RequestTvShowAsync(TvShowUserRequester requester, TvShow tvShow, TvSeason season)
+        public Task<TvShowRequestResult> RequestTvShowAsync(Guid categoryId, TvShowUserRequester requester, TvShow tvShow, TvSeason season)
         {
-            return CreateInstance<ITvShowRequester>().RequestTvShowAsync(requester, tvShow, season);
+            return CreateInstance<ITvShowRequester>().RequestTvShowAsync(categoryId, requester, tvShow, season);
         }
 
         private T CreateInstance<T>() where T : class

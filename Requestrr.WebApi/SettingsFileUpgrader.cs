@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr;
 
 namespace Requestrr.WebApi
 {
@@ -85,6 +86,54 @@ namespace Requestrr.WebApi
             {
                 settingsJson.Version = "1.11.0";
                 ((JObject)settingsJson).Add("BaseUrl", string.Empty);
+
+                File.WriteAllText(settingsFilePath, JsonConvert.SerializeObject(settingsJson));
+            }
+
+            if (settingsJson.Version.ToString().Equals("1.11.0", StringComparison.InvariantCultureIgnoreCase))
+            {
+                settingsJson.Version = "2.0.0";
+
+                var sonarrJson = settingsJson["DownloadClients"]["Sonarr"] as JObject;
+
+                var sonarrCategories = new SonarrCategorySettings[]
+                {
+                    new SonarrCategorySettings
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Tv Shows",
+                        ProfileId = int.Parse(sonarrJson.GetValue("TvProfileId").ToString()),
+                        Tags = sonarrJson.GetValue("TvTags").ToObject<int[]>(),
+                        LanguageId = int.Parse(sonarrJson.GetValue("TvLanguageId").ToString()),
+                        RootFolder = sonarrJson.GetValue("TvRootFolder").ToString(),
+                        UseSeasonFolders = bool.Parse(sonarrJson.GetValue("TvUseSeasonFolders").ToString()),
+                        SeriesType = SeriesType.Standard
+                    },
+                    new SonarrCategorySettings
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Anime",
+                        ProfileId = int.Parse(sonarrJson.GetValue("AnimeProfileId").ToString()),
+                        Tags = sonarrJson.GetValue("AnimeTags").ToObject<int[]>(),
+                        LanguageId = int.Parse(sonarrJson.GetValue("AnimeLanguageId").ToString()),
+                        RootFolder = sonarrJson.GetValue("AnimeRootFolder").ToString(),
+                        UseSeasonFolders = bool.Parse(sonarrJson.GetValue("AnimeUseSeasonFolders").ToString()),
+                        SeriesType = SeriesType.Anime
+                    }
+                };
+
+                ((JObject)settingsJson["DownloadClients"]["Sonarr"]).Add("Categories", JToken.FromObject(sonarrCategories));
+
+                sonarrJson.Remove("TvProfileId");
+                sonarrJson.Remove("TvRootFolder");
+                sonarrJson.Remove("TvTags");
+                sonarrJson.Remove("TvLanguageId");
+                sonarrJson.Remove("TvUseSeasonFolders");
+                sonarrJson.Remove("AnimeProfileId");
+                sonarrJson.Remove("AnimeRootFolder");
+                sonarrJson.Remove("AnimeTags");
+                sonarrJson.Remove("AnimeLanguageId");
+                sonarrJson.Remove("AnimeUseSeasonFolders"); 
 
                 File.WriteAllText(settingsFilePath, JsonConvert.SerializeObject(settingsJson));
             }

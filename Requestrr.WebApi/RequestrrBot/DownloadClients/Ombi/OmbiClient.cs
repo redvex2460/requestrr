@@ -248,7 +248,7 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Ombi
             throw new System.Exception("An error occurred while searching for availables movies from Ombi");
         }
 
-        public async Task<TvShowRequestResult> RequestTvShowAsync(TvShowUserRequester requester, TvShow tvShow, TvSeason season)
+        public async Task<TvShowRequestResult> RequestTvShowAsync(Guid categoryId, TvShowUserRequester requester, TvShow tvShow, TvSeason season)
         {
             var retryCount = 0;
 

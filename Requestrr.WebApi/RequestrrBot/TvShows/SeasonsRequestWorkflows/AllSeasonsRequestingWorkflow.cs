@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Requestrr.WebApi.RequestrrBot.TvShows.SeasonsRequestWorkflows
@@ -25,7 +26,7 @@ namespace Requestrr.WebApi.RequestrrBot.TvShows.SeasonsRequestWorkflows
             _tvShowNotificationWorkflow = tvShowNotificationWorkflow;
         }
 
-        public async Task RequestAsync(TvShow tvShow, AllTvSeasons selectedSeason)
+        public async Task RequestAsync(Guid categoryId, TvShow tvShow, AllTvSeasons selectedSeason)
         {
             await _userInterface.DisplayTvShowDetailsAsync(tvShow);
 
@@ -33,7 +34,7 @@ namespace Requestrr.WebApi.RequestrrBot.TvShows.SeasonsRequestWorkflows
 
             if (wasRequested)
             {
-                var result = await _requester.RequestTvShowAsync(_user, tvShow, selectedSeason);
+                var result = await _requester.RequestTvShowAsync(categoryId, _user, tvShow, selectedSeason);
 
                 if (result.WasDenied)
                 {

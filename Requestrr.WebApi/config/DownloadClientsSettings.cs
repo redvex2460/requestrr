@@ -1,4 +1,7 @@
-﻿namespace Requestrr.WebApi.config
+﻿using System;
+using System.Collections.Generic;
+
+namespace Requestrr.WebApi.config
 {
     public class DownloadClientsSettings
     {
@@ -44,19 +47,29 @@
         public int Port { get; set; }
         public string ApiKey { get; set; }
         public string BaseUrl { get; set; }
-        public string TvRootFolder { get; set; }
-        public int[] TvTags { get; set; }
-        public int TvProfileId { get; set; }
-        public int TvLanguageId { get; set; }
-        public bool TvUseSeasonFolders { get; set; }
-        public string AnimeRootFolder { get; set; }
-        public int[] AnimeTags { get; set; }
-        public int AnimeProfileId { get; set; }
-        public int AnimeLanguageId { get; set; }
-        public bool AnimeUseSeasonFolders { get; set; }
+        public List<SonarrCategorySettings> Categories { get; set; } = new List<SonarrCategorySettings>();
         public bool UseSSL { get; set; }
         public bool SearchNewRequests { get; set; }
         public bool MonitorNewRequests { get; set; }
         public string Version { get; set; }
+    }
+
+    public enum SeriesType
+    {
+        Standard,
+        Anime,
+        Daily
+    }
+
+    public class SonarrCategorySettings
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public SeriesType SeriesType { get; set; }
+        public int ProfileId { get; set; }
+        public string RootFolder { get; set; }
+        public int LanguageId { get; set; }
+        public int[] Tags { get; set; }
+        public bool UseSeasonFolders { get; set; }
     }
 }
